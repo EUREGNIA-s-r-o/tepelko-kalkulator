@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulačka Tepelko</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+    th { background-color: #eaeaea; }
+    select, input { padding: 5px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Kalkulačka Tepelných čerpadel</h1>
+  <label for="plocha">Užitná plocha (m²):</label>
+  <input type="number" id="plocha" value="150">
+
+  <label for="model">Zvolte model čerpadla:</label>
+  <select id="model"></select>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>COP</th>
+        <th>Spotřeba (kWh)</th>
+        <th>Náklad (Kč)</th>
+        <th>Náklad měsíčně (Kč)</th>
+        <th>Pořízení (Kč)</th>
+        <th>Návratnost (roky)</th>
+      </tr>
+    </thead>
+    <tbody id="vystup"></tbody>
+  </table>
+
+  <script>
+    const modely = {
+      "TEPELKO ESX6": { cop: 3.6, cena: 165000 },
+      "TEPELKO ESX8": { cop: 3.8, cena: 185000 },
+      "TEPELKO ESX10": { cop: 4.0, cena: 199000 },
+      "TEPELKO ESX12": { cop: 4.1, cena: 215000 },
+      "TEPELKO ESX14": { cop: 4.2, cena: 235000 },
+      "TEPELKO ESX15": { cop: 4.3, cena: 249000 },
+      "TEPELKO ESX18": { cop: 4.5, cena: 275000 },
+      "TEPELKO ESX22": { cop: 4.6, cena: 305000 },
+      "TEPELKO ESX28": { cop: 4.5, cena: 335000 },
+      "TEPELKO ESX35": { cop: 4.4, cena: 369000 },
+      "TEPELKO ESX50": { cop: 4.3, cena: 415000 }
+    };
+
+    const cenaEnergie = 6.2;
+    const ztrataNaM2 = 85;
+
+    function naplnitModely() {
+      const select = document.getElementById("model");
+      for (const model in modely) {
+        const option = document.createElement("option");
+        option.value = model;
+        option.textContent = model;
+        select.appendChild(option);
+      }
+    }
+
+    function prepocitat() {
+      const plocha = parseFloat(document.getElementById("plocha").value);
+      const zvolenyModel = document.getElementById("model").value;
+      const { cop, cena } = modely[zvolenyModel];
+
+      const ztrata = plocha * ztrataNaM2;
+      const spotreba = ztrata / cop;
+      const naklad = spotreba * cenaEnergie;
+      const nakladMesic = naklad / 12;
+      const navratnost = cena / naklad;
+
+      const tbody = document.getElementById("vystup");
+      tbody.innerHTML = `<tr>
+        <td>${zvolenyModel}</td>
+        <td>${cop}</td>
+        <td>${spotreba.toFixed(2)}</td>
+        <td>${naklad.toFixed(2)}</td>
+        <td>${nakladMesic.toFixed(2)}</td>
+        <td>${cena}</td>
+        <td>${navratnost.toFixed(1)}</td>
+      </tr>`;
+    }
+
+    document.getElementById("plocha").addEventListener("input", prepocitat);
+    document.getElementById("model").addEventListener("change", prepocitat);
+    window.onload = () => {
+      naplnitModely();
+      prepocitat();
+    };
+  </script>
+</body>
+</html>
