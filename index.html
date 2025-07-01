@@ -69,6 +69,14 @@
 <script>
   // Model data: výkonový rozsah (min, max), název modelu, SVT kód
   const models = [
+    { min: 0,   max: 6.0,   name: "TEPELKO ES 6 kW", svt: "SVT32778", link: "https://www.tepelko.cz/produkt/tepelko-es-6-kw/" },
+    { min: 6.1, max: 8.0,   name: "TEPELKO ESX 9 kW", svt: "SVT35663", link: "https://www.tepelko.cz/produkt/tepelko-esx-9-kw/" },
+    { min: 8.1, max: 10.5,  name: "TEPELKO ES 10 kW", svt: "SVT32779", link: "https://www.tepelko.cz/produkt/tepelko-es-10-kw/" },
+    { min: 10.6, max: 13.0, name: "TEPELKO ES 14 kW", svt: "SVT32777", link: "https://www.tepelko.cz/produkt/tepelko-es-14-kw/" },
+    { min: 13.1, max: 16.0, name: "TEPELKO ESX 15 kW", svt: "SVT35690", link: "https://www.tepelko.cz/produkt/tepelko-esx-15-kw/" },
+    { min: 16.1, max: 20.0, name: "TEPELKO ES 19 kW", svt: "SVT32776", link: "https://www.tepelko.cz/produkt/tepelko-es-19-kw/" },
+    { min: 20.1, max: 24.0, name: "TEPELKO ESX 22 kW / ESX22C1", svt: "SVT35662 / SVT35486", link: "https://www.tepelko.cz/produkt/tepelko-esx-22-kw/" },
+    { min: 24.1, max: 30.0, name: "TEPELKO ES 24 kW", svt: "SVT35465", link: "https://www.tepelko.cz/produkt/tepelko-es-24-kw/" },
     { min: 0,   max: 6.0,   name: "TEPELKO ES 6 kW", svt: "SVT32778" },
     { min: 6.1, max: 8.0,   name: "TEPELKO ESX 9 kW", svt: "SVT35663" },
     { min: 8.1, max: 10.5,  name: "TEPELKO ES 10 kW", svt: "SVT32779" },
@@ -99,6 +107,7 @@
       output.style.display = "block";
       output.innerHTML = `
 <p><strong>Požadovaný tepelný výkon:</strong> ${neededKW.toFixed(1)} kW</p>
+<p><strong>Doporučený model:</strong> <a href="${match.link}" target="_blank">${match.name}</a></p></strong> ${neededKW.toFixed(1)} kW</p>
 <p><strong>Doporučený model:</strong> ${match.name}</p>
 <p><strong>Rozsah modelu:</strong> ${match.min} - ${match.max} kW</p>
 <p><strong>SVT kód:</strong> ${match.svt}</p>
