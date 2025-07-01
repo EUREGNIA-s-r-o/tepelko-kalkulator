@@ -1,96 +1,114 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <title>Kalkulačka Tepelko</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7; }
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-    th { background-color: #eaeaea; }
-    select, input { padding: 5px; margin: 10px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulačka - Tepelné čerpadlo TEPELKO</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background: linear-gradient(to bottom, #e0f7fa, #e8f5e9);
+    }
+    h1 {
+      text-align: center;
+      color: #00695c;
+    }
+    label, input, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    input[type="number"] {
+      padding: 8px;
+      border: 1px solid #80cbc4;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .result {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #ccc;
+    }
+    .result p {
+      margin: 10px 0;
+    }
+</style>
 </head>
 <body>
-  <h1>Kalkulačka Tepelných čerpadel</h1>
-  <label for="plocha">Užitná plocha (m²):</label>
-  <input type="number" id="plocha" value="150">
-
-  <label for="model">Zvolte model čerpadla:</label>
-  <select id="model"></select>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Model</th>
-        <th>COP</th>
-        <th>Spotřeba (kWh)</th>
-        <th>Náklad (Kč)</th>
-        <th>Náklad měsíčně (Kč)</th>
-        <th>Pořízení (Kč)</th>
-        <th>Návratnost (roky)</th>
-      </tr>
-    </thead>
-    <tbody id="vystup"></tbody>
-  </table>
-
-  <script>
-    const modely = {
-      "TEPELKO ESX6": { cop: 3.6, cena: 165000 },
-      "TEPELKO ESX8": { cop: 3.8, cena: 185000 },
-      "TEPELKO ESX10": { cop: 4.0, cena: 199000 },
-      "TEPELKO ESX12": { cop: 4.1, cena: 215000 },
-      "TEPELKO ESX14": { cop: 4.2, cena: 235000 },
-      "TEPELKO ESX15": { cop: 4.3, cena: 249000 },
-      "TEPELKO ESX18": { cop: 4.5, cena: 275000 },
-      "TEPELKO ESX22": { cop: 4.6, cena: 305000 },
-      "TEPELKO ESX28": { cop: 4.5, cena: 335000 },
-      "TEPELKO ESX35": { cop: 4.4, cena: 369000 },
-      "TEPELKO ESX50": { cop: 4.3, cena: 415000 }
-    };
-
-    const cenaEnergie = 6.2;
-    const ztrataNaM2 = 85;
-
-    function naplnitModely() {
-      const select = document.getElementById("model");
-      for (const model in modely) {
-        const option = document.createElement("option");
-        option.value = model;
-        option.textContent = model;
-        select.appendChild(option);
-      }
+ 
+<h1>Kalkulačka pro výběr tepelného čerpadla</h1>
+ 
+<label for="area">Vytápěná plocha (m²):</label>
+<input type="number" id="area" placeholder="Např. 120" min="1">
+ 
+<label for="loss">Měrná tepelná ztráta (W/m²):</label>
+<input type="number" id="loss" value="70" min="10">
+ 
+<button onclick="calculate()">Spočítat doporučený model</button>
+ 
+<div class="result" id="output" style="display:none;"></div>
+ 
+<a href="https://www.tepelko.cz" target="_blank">
+<img src="https://www.tepelko.cz/wp-content/uploads/2023/05/logo-tepelko-e1684410121302.png" alt="Logo TEPELKO" style="display: block; max-width: 300px; margin: 30px auto;">
+</a>
+ 
+<script>
+  // Model data: výkonový rozsah (min, max), název modelu, SVT kód
+  const models = [
+    { min: 0,   max: 6.0,   name: "TEPELKO ES 6 kW", svt: "SVT32778" },
+    { min: 6.1, max: 8.0,   name: "TEPELKO ESX 9 kW", svt: "SVT35663" },
+    { min: 8.1, max: 10.5,  name: "TEPELKO ES 10 kW", svt: "SVT32779" },
+    { min: 10.6, max: 13.0, name: "TEPELKO ES 14 kW", svt: "SVT32777" },
+    { min: 13.1, max: 16.0, name: "TEPELKO ESX 15 kW", svt: "SVT35690" },
+    { min: 16.1, max: 20.0, name: "TEPELKO ES 19 kW", svt: "SVT32776" },
+    { min: 20.1, max: 24.0, name: "TEPELKO ESX 22 kW / ESX22C1", svt: "SVT35662 / SVT35486" },
+    { min: 24.1, max: 30.0, name: "TEPELKO ES 24 kW", svt: "SVT35465" },
+  ];
+ 
+  function calculate() {
+    const area = parseFloat(document.getElementById("area").value);
+    const loss = parseFloat(document.getElementById("loss").value);
+    const output = document.getElementById("output");
+ 
+    if (isNaN(area) || isNaN(loss) || area <= 0 || loss <= 0) {
+      output.style.display = "block";
+      output.innerHTML = "<p style='color:red;'>Zadejte prosím platné hodnoty plochy a ztráty.</p>";
+      return;
     }
-
-    function prepocitat() {
-      const plocha = parseFloat(document.getElementById("plocha").value);
-      const zvolenyModel = document.getElementById("model").value;
-      const { cop, cena } = modely[zvolenyModel];
-
-      const ztrata = plocha * ztrataNaM2;
-      const spotreba = ztrata / cop;
-      const naklad = spotreba * cenaEnergie;
-      const nakladMesic = naklad / 12;
-      const navratnost = cena / naklad;
-
-      const tbody = document.getElementById("vystup");
-      tbody.innerHTML = `<tr>
-        <td>${zvolenyModel}</td>
-        <td>${cop}</td>
-        <td>${spotreba.toFixed(2)}</td>
-        <td>${naklad.toFixed(2)}</td>
-        <td>${nakladMesic.toFixed(2)}</td>
-        <td>${cena}</td>
-        <td>${navratnost.toFixed(1)}</td>
-      </tr>`;
+ 
+    const neededW = area * loss;
+    const neededKW = neededW / 1000;
+ 
+    const match = models.find(m => neededKW >= m.min && neededKW <= m.max);
+ 
+    if (match) {
+      output.style.display = "block";
+      output.innerHTML = `
+<p><strong>Požadovaný tepelný výkon:</strong> ${neededKW.toFixed(1)} kW</p>
+<p><strong>Doporučený model:</strong> ${match.name}</p>
+<p><strong>Rozsah modelu:</strong> ${match.min} - ${match.max} kW</p>
+<p><strong>SVT kód:</strong> ${match.svt}</p>
+      `;
+    } else {
+      output.style.display = "block";
+      output.innerHTML = `<p style='color:red;'>Pro počítaný výkon ${neededKW.toFixed(1)} kW nebyl nalezen vhodný model.</p>`;
     }
-
-    document.getElementById("plocha").addEventListener("input", prepocitat);
-    document.getElementById("model").addEventListener("change", prepocitat);
-    window.onload = () => {
-      naplnitModely();
-      prepocitat();
-    };
-  </script>
+  }
+</script>
+ 
 </body>
 </html>
