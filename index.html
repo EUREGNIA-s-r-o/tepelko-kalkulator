@@ -3,29 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kalkulačka - Tepelné čerpadlo TEPELKO</title>
+<title>Kalkulačka Tepelného Čerpadla TEPELKO</title>
 <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
       background: linear-gradient(to bottom, #e0f7fa, #e8f5e9);
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      min-height: 100dvh;
     }
-    h1 {
+
+    h1, h2, h3 {
       text-align: center;
       color: #00695c;
     }
-    label, input, select {
+
+    label, input, select, textarea {
       display: block;
       width: 100%;
       margin-bottom: 15px;
     }
-    input[type="number"] {
+
+    input[type="number"],
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
       padding: 8px;
       border: 1px solid #80cbc4;
       border-radius: 4px;
+      font-size: 14px;
     }
+
+    textarea {
+      resize: none; /* zakázání změny velikosti */
+    }
+
     button {
       background-color: #00796b;
       color: white;
@@ -33,90 +47,201 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      margin-top: 10px;
     }
+
     button:hover {
       background-color: #004d40;
     }
-    .result {
+
+    .result, .output-section {
       background: #ffffff;
       padding: 15px;
       border-radius: 5px;
       box-shadow: 0 0 5px #ccc;
+      margin-top: 20px;
     }
-    .result p {
-      margin: 10px 0;
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header img {
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    form {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #ccc;
+      margin-top: 20px;
     }
 </style>
 </head>
 <body>
- 
-<h1>Kalkulačka pro výběr tepelného čerpadla</h1>
- 
+
+<div class="header">
+  <img src="https://www.tepelko.cz/wp-content/uploads/2023/05/logo-tepelko-e1684410121302.png" alt="Logo Tepelko">
+  <h1>Kalkulačka pro výběr tepleného čerpadla TEPELKO</h1>
+</div>
+
 <label for="area">Vytápěná plocha (m²):</label>
 <input type="number" id="area" placeholder="Např. 120" min="1">
- 
+
 <label for="loss">Měrná tepelná ztráta (W/m²):</label>
 <input type="number" id="loss" value="70" min="10">
- 
+
 <button onclick="calculate()">Spočítat doporučený model</button>
- 
+
 <div class="result" id="output" style="display:none;"></div>
- 
-<a href="https://www.tepelko.cz" target="_blank">
-<img src="https://www.tepelko.cz/wp-content/uploads/2023/05/logo-tepelko-e1684410121302.png" alt="Logo TEPELKO" style="display: block; max-width: 300px; margin: 30px auto;">
-</a>
- 
+
+<hr>
+
+<h2>Doplňková kalkulace nákladů</h2>
+
+<label for="unitPrice">Zvolte teplené čerpadlo (pro součet):</label>
+<select id="unitPrice">
+<option value="">-- Vyberte model --</option>
+<option value="503888">Tepelko ESX 50 kW</option>
+<option value="212688">Tepelko ESX 15 12kW</option>
+<option value="190288">Tepelko ESX 9 (8kW)</option>
+<option value="246288">Tepelko ES 24 kW</option>
+<option value="223888">Tepelko ES 18 kW</option>
+<option value="201488">Tepelko ES 14 kW</option>
+<option value="190288">Tepelko ES 10 kW</option>
+<option value="156688">Tepelko ES 6,5 kW</option>
+</select>
+
+<label for="aku">Vyber AKU nádrž:</label>
+<select id="aku">
+<option value="none">Bez AKU</option>
+<option value="7728">AKU 100 l</option>
+<option value="11088">AKU 200 l</option>
+<option value="12208">AKU 300 l</option>
+<option value="22288">AKU 500 l</option>
+</select>
+
+<label for="tuv">Vyber TUV nádrž:</label>
+<select id="tuv">
+<option value="0">Bez TUV</option>
+<option value="78288">TUV 750 l</option>
+<option value="44688">TUV 500 l</option>
+<option value="33488">TUV 300 l (varianta A)</option>
+<option value="27888">TUV 300 l (varianta B)</option>
+<option value="25648">TUV 250 l</option>
+<option value="22288">TUV 200 l</option>
+</select>
+
+<label for="mounting">Typ montáže:</label>
+<select id="mounting">
+<option value="none">Bez montáže</option>
+<option value="AKU">Montáž AKU</option>
+<option value="AKU+TUV">Montáž AKU + TUV</option>
+</select>
+
+<label><input type="checkbox" id="startup"> Autorizované spuštění</label>
+<label><input type="checkbox" id="delivery"> Doprava</label>
+
+<button onclick="calculateTotal()">Spočítat doplňkovou cenu</button>
+
+<div class="output-section" id="result"></div>
+
+<h2>Odeslat nezávaznou poptávku</h2>
+<form id="inquiryForm">
+  <label for="name">Jméno a příjmení:</label>
+  <input type="text" id="name" required>
+
+  <label for="email">E-mail:</label>
+  <input type="email" id="email" required>
+
+  <label for="phone">Telefon:</label>
+  <input type="text" id="phone">
+
+  <label for="note">Poznámka:</label>
+  <textarea id="note" rows="4" placeholder="Zde můžete uvést další specifikaci, termín, umístění apod."></textarea>
+
+  <button type="button" onclick="submitForm()">Odeslat poptávku</button>
+</form>
+
 <script>
-  // Model data: výkonový rozsah (min, max), název modelu, SVT kód
+function submitForm() {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const phone = document.getElementById("phone").value;
+  const note = document.getElementById("note").value;
+  const result = document.getElementById("output")?.innerText || "";
+  const details = document.getElementById("result")?.innerText || "";
+
+  const subject = encodeURIComponent("Nezávazná poptávka tepelko.cz");
+  const body = encodeURIComponent(`Jméno: ${name}\nE-mail: ${email}\nTelefon: ${phone}\n\nPoznámka:\n${note}\n\n---\n\nKalkulace:\n${result}\n\nDoplňkové položky:\n${details}`);
+
+  const mailtoLink = `mailto:info@tepelko.cz,poptavky@tepelko.cz?subject=${subject}&body=${body}`;
+  window.location.href = mailtoLink;
+}
+
+function calculate() {
   const models = [
-    { min: 0,   max: 6.0,   name: "TEPELKO ES 6 kW", svt: "SVT32778", link: "https://www.tepelko.cz/produkt/tepelko-es-6-kw/" },
-    { min: 6.1, max: 8.0,   name: "TEPELKO ESX 9 kW", svt: "SVT35663", link: "https://www.tepelko.cz/produkt/tepelko-esx-9-kw/" },
-    { min: 8.1, max: 10.5,  name: "TEPELKO ES 10 kW", svt: "SVT32779", link: "https://www.tepelko.cz/produkt/tepelko-es-10-kw/" },
-    { min: 10.6, max: 13.0, name: "TEPELKO ES 14 kW", svt: "SVT32777", link: "https://www.tepelko.cz/produkt/tepelko-es-14-kw/" },
-    { min: 13.1, max: 16.0, name: "TEPELKO ESX 15 kW", svt: "SVT35690", link: "https://www.tepelko.cz/produkt/tepelko-esx-15-kw/" },
-    { min: 16.1, max: 20.0, name: "TEPELKO ES 19 kW", svt: "SVT32776", link: "https://www.tepelko.cz/produkt/tepelko-es-19-kw/" },
-    { min: 20.1, max: 24.0, name: "TEPELKO ESX 22 kW / ESX22C1", svt: "SVT35662 / SVT35486", link: "https://www.tepelko.cz/produkt/tepelko-esx-22-kw/" },
-    { min: 24.1, max: 30.0, name: "TEPELKO ES 24 kW", svt: "SVT35465", link: "https://www.tepelko.cz/produkt/tepelko-es-24-kw/" },
-    { min: 0,   max: 6.0,   name: "TEPELKO ES 6 kW", svt: "SVT32778" },
-    { min: 6.1, max: 8.0,   name: "TEPELKO ESX 9 kW", svt: "SVT35663" },
-    { min: 8.1, max: 10.5,  name: "TEPELKO ES 10 kW", svt: "SVT32779" },
-    { min: 10.6, max: 13.0, name: "TEPELKO ES 14 kW", svt: "SVT32777" },
-    { min: 13.1, max: 16.0, name: "TEPELKO ESX 15 kW", svt: "SVT35690" },
-    { min: 16.1, max: 20.0, name: "TEPELKO ES 19 kW", svt: "SVT32776" },
-    { min: 20.1, max: 24.0, name: "TEPELKO ESX 22 kW / ESX22C1", svt: "SVT35662 / SVT35486" },
-    { min: 24.1, max: 30.0, name: "TEPELKO ES 24 kW", svt: "SVT35465" },
+    { min: 0, max: 6.0, name: "TEPELKO ES 6 kW", link: "https://www.tepelko.cz/produkt/tepelko-es-6-kw/" },
+    { min: 6.1, max: 8.0, name: "TEPELKO ESX 9 kW", link: "https://www.tepelko.cz/produkt/tepelko-esx-9-kw/" },
+    { min: 8.1, max: 10.5, name: "TEPELKO ES 10 kW", link: "https://www.tepelko.cz/produkt/tepelko-es-10-kw/" },
+    { min: 10.6, max: 13.0, name: "TEPELKO ES 14 kW", link: "https://www.tepelko.cz/produkt/tepelko-es-14-kw/" },
+    { min: 13.1, max: 16.0, name: "TEPELKO ESX 15 kW", link: "https://www.tepelko.cz/produkt/tepelko-esx-15-kw/" },
+    { min: 16.1, max: 20.0, name: "TEPELKO ES 19 kW", link: "https://www.tepelko.cz/produkt/tepelko-es-19-kw/" },
+    { min: 20.1, max: 24.0, name: "TEPELKO ES 24 kW", link: "https://www.tepelko.cz/produkt/tepelko-es-24-kw/" }
   ];
- 
-  function calculate() {
-    const area = parseFloat(document.getElementById("area").value);
-    const loss = parseFloat(document.getElementById("loss").value);
-    const output = document.getElementById("output");
- 
-    if (isNaN(area) || isNaN(loss) || area <= 0 || loss <= 0) {
-      output.style.display = "block";
-      output.innerHTML = "<p style='color:red;'>Zadejte prosím platné hodnoty plochy a ztráty.</p>";
-      return;
-    }
- 
-    const neededW = area * loss;
-    const neededKW = neededW / 1000;
- 
-    const match = models.find(m => neededKW >= m.min && neededKW <= m.max);
- 
-    if (match) {
-      output.style.display = "block";
-      output.innerHTML = `
-<p><strong>Požadovaný tepelný výkon:</strong> ${neededKW.toFixed(1)} kW</p>
-<p><strong>Doporučený model:</strong> <a href="${match.link}" target="_blank">${match.name}</a></p></strong> ${neededKW.toFixed(1)} kW</p>
-<p><strong>Rozsah modelu:</strong> ${match.min} - ${match.max} kW</p>
-<p><strong>SVT kód:</strong> ${match.svt}</p>
-      `;
-    } else {
-      output.style.display = "block";
-      output.innerHTML = `<p style='color:red;'>Pro počítaný výkon ${neededKW.toFixed(1)} kW nebyl nalezen vhodný model.</p>`;
-    }
+
+  const area = parseFloat(document.getElementById("area").value);
+  const loss = parseFloat(document.getElementById("loss").value);
+  const output = document.getElementById("output");
+
+  if (isNaN(area) || isNaN(loss) || area <= 0 || loss <= 0) {
+    output.style.display = "block";
+    output.innerHTML = "<p style='color:red;'>Zadejte prosím platné hodnoty plochy a ztráty.</p>";
+    return;
   }
+
+  const neededKW = (area * loss) / 1000;
+  const match = models.find(m => neededKW >= m.min && neededKW <= m.max);
+
+  if (match) {
+    output.style.display = "block";
+    output.innerHTML = `
+<p><strong>Požadovaný výkon:</strong> ${neededKW.toFixed(1)} kW</p>
+<p><strong>Doporučený model:</strong> <a href="${match.link}" target="_blank">${match.name}</a></p>
+<p><strong>Rozsah modelu:</strong> ${match.min} - ${match.max} kW</p>`;
+  } else {
+    output.style.display = "block";
+    output.innerHTML = `<p style='color:red;'>Pro výkon ${neededKW.toFixed(1)} kW nebyl nalezen model.</p>`;
+  }
+}
+
+function calculateTotal() {
+  const unitPrice = parseFloat(document.getElementById("unitPrice").value) || 0;
+  const aku = parseFloat(document.getElementById("aku").value) || 0;
+  const tuv = parseFloat(document.getElementById("tuv").value) || 0;
+  const mounting = document.getElementById("mounting").value;
+  const startup = document.getElementById("startup").checked;
+  const delivery = document.getElementById("delivery").checked;
+
+  let total = unitPrice + aku + tuv;
+  let detail = [];
+
+  if (unitPrice > 0) detail.push(`Tepelné čerpadlo: ${unitPrice.toLocaleString()} Kč`);
+  if (aku > 0) detail.push(`AKU nádrž: ${aku.toLocaleString()} Kč`);
+  if (tuv > 0) detail.push(`TUV nádrž: ${tuv.toLocaleString()} Kč`);
+  if (mounting === 'AKU') { total += 44800; detail.push(`Montáž AKU: 44 800 Kč`); }
+  if (mounting === 'AKU+TUV') { total += 54880; detail.push(`Montáž AKU + TUV: 54 880 Kč`); }
+  if (startup) { total += 3248; detail.push(`Spuštění: 3 248 Kč`); }
+  if (delivery) { total += 2800; detail.push(`Doprava: 2 800 Kč`); }
+
+  document.getElementById('result').innerHTML = `
+<h3>Souhrnná cena: ${total.toLocaleString('cs-CZ')} Kč</h3>
+<ul><li>${detail.join('</li><li>')}</li></ul>`;
+}
 </script>
- 
+
 </body>
 </html>
